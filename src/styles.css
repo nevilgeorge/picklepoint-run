@@ -98,3 +98,82 @@ kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-width: 3px;
 .dpad button { height: 60px; border-radius: 14px; border: 1.5px solid var(--wall); background: var(--panel); color: var(--wall-soft); display: flex; align-items: center; justify-content: center; touch-action: none; }
 .dpad .gap { height: 60px; }
 @media (pointer: coarse) { .dpad { display: grid; } }
+
+/* ---------- Leaderboard (§7) ---------- */
+.overlay { justify-content: safe center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+#scoresBtn.pressed, #scoresBtn[aria-pressed="true"] { border-color: var(--wall); background: var(--lane); color: var(--wall-soft); box-shadow: inset 0 2px 6px rgba(0,0,0,.5); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.overlay.end { gap: 12px; }
+.overlay h2.small { font-size: clamp(11px, 1.8vw, 14px); }
+.overlay h2.headline { color: var(--dot); text-shadow: 0 0 18px rgba(255,213,138,.6); font-size: clamp(18px, 4vw, 32px); }
+.overlay .final { display: flex; align-items: center; gap: 12px; }
+.rank-chip { font-family: var(--font-display); font-size: 11px; color: var(--block); background: var(--dot); border-radius: 6px; padding: 6px 8px; line-height: 1; }
+.rank-chip.big { font-size: clamp(10px, 1.6vw, 13px); }
+.lb-error-text { color: var(--alert) !important; font-size: 12px; }
+
+.initials { display: flex; gap: 14px; padding: 24px 0; }
+.slot-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
+.slot {
+  width: 64px; height: 78px; border-radius: 10px; border: 2px solid var(--line); background: var(--lane);
+  color: var(--text); font: 30px/1 var(--font-display); cursor: pointer; padding: 0;
+}
+.slot.empty { color: var(--faint); }
+.slot.active { border-color: var(--wall); box-shadow: 0 0 0 1px var(--wall), 0 0 16px rgba(63,208,201,.55); }
+.slot:focus-visible, .chev:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--dot); outline-offset: 2px; }
+.chev { position: absolute; left: 50%; transform: translateX(-50%); width: 36px; height: 22px; border: 0; background: none; color: var(--wall-soft); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.chev.up { top: -24px; }
+.chev.down { bottom: -24px; }
+
+.lb-head, .modal-head { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.lb-title { font-family: var(--font-display); font-size: clamp(16px, 3vw, 24px) !important; color: var(--text) !important; text-shadow: none !important; margin: 0; }
+table.scores { width: 100%; max-width: 520px; border-collapse: separate; border-spacing: 0 4px; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.scores th { font-family: var(--font-display); font-size: 8px; color: var(--faint); letter-spacing: 1px; font-weight: 400; text-align: left; padding: 4px 10px; }
+table.scores td { padding: 7px 10px; background: rgba(21,18,45,.9); text-align: left; color: var(--text); }
+table.scores td:first-child { border-radius: 8px 0 0 8px; }
+table.scores td:last-child { border-radius: 0 8px 8px 0; }
+table.scores .num-col { text-align: right; }
+table.scores .rank { color: var(--muted); width: 2.5em; }
+table.scores .name { font-weight: 700; letter-spacing: .15em; }
+table.scores .score { color: var(--dot); }
+table.scores .date { color: var(--muted); }
+table.scores tr.status td { text-align: center; color: var(--muted); padding: 16px; border-radius: 8px; }
+table.scores tr.me td { background: rgba(139,212,80,.16); box-shadow: inset 0 2px 0 var(--pickle), inset 0 -2px 0 var(--pickle); }
+table.scores tr.me td:first-child { box-shadow: inset 2px 0 0 var(--pickle), inset 0 2px 0 var(--pickle), inset 0 -2px 0 var(--pickle); }
+table.scores tr.me td:last-child { box-shadow: inset -2px 0 0 var(--pickle), inset 0 2px 0 var(--pickle), inset 0 -2px 0 var(--pickle); }
+table.scores tr.me { animation: me-glow 1.6s ease-in-out infinite; }
+@keyframes me-glow { 0%, 100% { filter: drop-shadow(0 0 2px rgba(139,212,80,.35)); } 50% { filter: drop-shadow(0 0 9px rgba(139,212,80,.75)); } }
+.you-tag { margin-left: 8px; font-family: var(--font-display); font-size: 7px; letter-spacing: 1px; color: #10220A; background: var(--pickle); border-radius: 4px; padding: 3px 5px; vertical-align: middle; }
+.lb-error { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; color: var(--text); }
+
+.short-card { width: 100%; max-width: 420px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.short-card p { font-size: 12px; color: var(--muted) !important; max-width: none !important; line-height: 1.5; }
+.short-row { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.short-row span { color: var(--dot); }
+.short-meter > div { background: linear-gradient(90deg, var(--pickle-dark), var(--pickle)); }
+
+.modal-backdrop { position: absolute; inset: 0; display: flex; align-items: safe center; justify-content: center; padding: 20px; background: rgba(11,10,23,.82); overflow-y: auto; }
+.modal-backdrop[hidden] { display: none; }
+.modal { width: 100%; max-width: 560px; background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; box-shadow: 0 24px 60px rgba(0,0,0,.6); padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.modal .modal-head { width: 100%; justify-content: flex-start; }
+.modal .icon-btn { margin-left: auto; }
+.modal .sub { margin: 0; font-size: 12px; color: var(--muted); }
+.modal .table-slot { width: 100%; display: flex; justify-content: center; }
+.icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--panel); color: var(--text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.icon-btn:hover { border-color: var(--wall); }
+
+@media (max-width: 600px) {
+  .overlay { padding: 14px; gap: 10px; }
+  .overlay.end { gap: 8px; }
+  .overlay p { font-size: 12px; line-height: 1.5; }
+  .slot { width: 44px; height: 54px; font-size: 20px; }
+  .initials { gap: 10px; padding: 22px 0; }
+  table.scores { font-size: 11px; }
+  table.scores td { padding: 5px 6px; }
+  table.scores th { padding: 3px 6px; }
+  .modal { padding: 12px; }
+  .btn { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  table.scores tr.me { animation: none; filter: drop-shadow(0 0 5px rgba(139,212,80,.55)); }
+}

@@ -23,6 +23,7 @@
     <div class="stat"><span class="k">LIVES</span><div class="lives" id="lives" aria-live="polite"></div></div>
     <button class="btn" id="pauseBtn" type="button">Pause</button>
     <button class="btn" id="restartBtn" type="button">Restart</button>
+    <button class="btn" id="scoresBtn" type="button" aria-pressed="false" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v1a4 4 0 0 1-4 4M7 5H4v1a4 4 0 0 0 4 4"/></svg>Scores</button>
   </header>
 
   <div class="stage">
@@ -30,6 +31,7 @@
       <canvas id="game" width="840" height="720" aria-label="Picklepoint Run game board: a maze of Greenpoint streets"></canvas>
       <div class="banner" id="banner" hidden>READY!</div>
       <div class="overlay" id="overlay"></div>
+      <div class="modal-backdrop" id="scoresModal" hidden></div>
     </div>
 
     <aside>
