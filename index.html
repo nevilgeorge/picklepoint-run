@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0B0A17">
+  <title>Picklepoint Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>PICKLEPOINT RUN</h1>
+      <p>GREENPOINT · BROOKLYN 11222</p>
+    </div>
+    <div class="stat"><span class="k up">1UP</span><span class="v" id="score">000,000</span></div>
+    <div class="stat"><span class="k">HIGH</span><span class="v hi" id="high">000,000</span></div>
+    <div class="stat"><span class="k">LIVES</span><div class="lives" id="lives" aria-live="polite"></div></div>
+    <button class="btn" id="pauseBtn" type="button">Pause</button>
+    <button class="btn" id="restartBtn" type="button">Restart</button>
+  </header>
+
+  <div class="stage">
+    <div class="board" id="board">
+      <canvas id="game" width="840" height="720" aria-label="Picklepoint Run game board: a maze of Greenpoint streets"></canvas>
+      <div class="banner" id="banner" hidden>READY!</div>
+      <div class="overlay" id="overlay"></div>
+    </div>
+
+    <aside>
+      <section class="card">
+        <h3>YOU'RE ON</h3>
+        <p class="where" id="where">Manhattan Ave &amp; Java St</p>
+        <p class="where-sub" id="whereSub">Intersection</p>
+        <div class="chips"><span class="chip" id="dotsLeft">— left to eat</span></div>
+        <div id="powerWrap" hidden>
+          <div class="meter-label">Pierogi power — they're running</div>
+          <div class="meter"><div id="power"></div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>HOW TO PLAY</h3>
+        <ul class="rules">
+          <li><strong>Clear the board</strong> — eat every dot and pierogi to win.</li>
+          <li><strong>Pierogi</strong> make the chasers flee for 8 seconds. You can't eat them, but they can't hurt you while they run.</li>
+          <li><strong>3 lives.</strong> Touching a chaser costs one.</li>
+          <li><strong>Beat the 5:00 par.</strong> Clear the board with time left and earn 10 points per second remaining. The clock stops while paused.</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> or <kbd>WASD</kbd> to move, <kbd>P</kbd> to pause.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>ON YOUR TAIL</h3>
+        <div class="cast">
+          <div><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="11" cy="15" rx="8" ry="6.5" fill="#8E9BB0"/><circle cx="15.5" cy="8.5" r="4.5" fill="#6F7C95"/><path d="M11 11.5c2-1 5-1 6.5 1" stroke="#4FB59A" stroke-width="2" fill="none"/><path d="M19.5 8l3.5 1.2-3.5 1.2z" fill="#F2A541"/><circle cx="16.6" cy="7.6" r="1.4" fill="#fff"/><circle cx="17" cy="7.6" r=".7" fill="#111"/></svg><p><b>Pidge</b><span>Follows your trail</span></p></div>
+          <div><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16c-3 0-3.5-4-1.5-6" stroke="#E8A0A8" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="11" cy="15" rx="7.5" ry="5.5" fill="#9C6B4E"/><circle cx="17.5" cy="12" r="4.2" fill="#9C6B4E"/><circle cx="16.4" cy="7.8" r="2.4" fill="#E8A0A8"/><circle cx="21.6" cy="12.6" r="1.1" fill="#E8A0A8"/><circle cx="18.6" cy="11" r="1.2" fill="#fff"/><circle cx="18.9" cy="11" r=".6" fill="#111"/></svg><p><b>Scraps</b><span>Cuts you off</span></p></div>
+          <div><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="11" cy="15" rx="8" ry="6" fill="#F4F4F2"/><path d="M5 13c3-3 7-3 10 0-3 2-7 2-10 0z" fill="#AEB8C6"/><circle cx="16.5" cy="9" r="4.2" fill="#F4F4F2"/><path d="M20 9l3.5.8-3.5 1.4z" fill="#F7D046"/><circle cx="21.6" cy="10" r=".6" fill="#E0533D"/><circle cx="17.6" cy="8.2" r="1" fill="#111"/></svg><p><b>Gully</b><span>Fast by the water</span></p></div>
+          <div><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7L6 2.5 9.5 5.5zM19.5 7L18 2.5 14.5 5.5z" fill="#6E737D"/><circle cx="12" cy="13" r="9" fill="#8A8F99"/><path d="M3.5 12.5c3-2.4 14-2.4 17 0-1.5 2.4-14 2.4-17 0z" fill="#1C1C22"/><circle cx="8.6" cy="12.4" r="1.6" fill="#fff"/><circle cx="15.4" cy="12.4" r="1.6" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#1C1C22"/></svg><p><b>Bandit</b><span>Wanders, then charges</span></p></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>PARKS ON THIS MAP</h3>
+        <ol class="list">
+          <li><span class="num">1</span><p><b>Box Street Park</b><span>Commercial St · under construction</span></p></li>
+          <li><span class="num">2</span><p><b>Newtown Barge Playground</b><span>Commercial St &amp; Dupont St</span></p></li>
+          <li><span class="num">3</span><p><b>WNYC Transmitter Park</b><span>Foot of Greenpoint Ave &amp; Kent St</span></p></li>
+          <li><span class="num">4</span><p><b>American Playground</b><span>Franklin St &amp; Milton St</span></p></li>
+          <li><span class="num">5</span><p><b>Msgr. McGolrick Park</b><span>Nassau–Driggs Aves, Russell–Monitor Sts</span></p></li>
+          <li><span class="num">6</span><p><b>McCarren Park</b><span>South of Nassau Ave (map edge)</span></p></li>
+        </ol>
+      </section>
+
+      <div class="dpad" aria-label="Direction pad">
+        <span class="gap"></span>
+        <button type="button" data-dir="up" aria-label="Move up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+        <span class="gap"></span>
+        <button type="button" data-dir="left" aria-label="Move left"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <span class="gap"></span>
+        <button type="button" data-dir="right" aria-label="Move right"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <span class="gap"></span>
+        <button type="button" data-dir="down" aria-label="Move down"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <span class="gap"></span>
+      </div>
+    </aside>
+  </div>
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

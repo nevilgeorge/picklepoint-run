@@ -1,0 +1,28 @@
+{
+  "name": "picklepoint-run",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "pages:dev": "VITE_LEADERBOARD_URL=/api/scores vite build && wrangler pages dev dist",
+    "db:migrate:local": "wrangler d1 migrations apply picklepoint-scores --local",
+    "db:migrate:remote": "wrangler d1 migrations apply picklepoint-scores --remote",
+    "deploy": "tsc --noEmit && VITE_LEADERBOARD_URL=/api/scores vite build && wrangler pages deploy dist"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.5",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.156.0"
+  }
+}
