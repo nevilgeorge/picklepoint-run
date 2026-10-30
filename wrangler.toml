@@ -1,0 +1,13 @@
+name = "picklepoint-run"
+compatibility_date = "2026-10-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "picklepoint-scores"
+# Replace with the id printed by `npx wrangler d1 create picklepoint-scores`.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# IP_SALT is a secret: set it with `npx wrangler pages secret put IP_SALT`
+# (and in .dev.vars for local `wrangler pages dev`).
