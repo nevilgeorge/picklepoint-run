@@ -2,6 +2,7 @@
 
 import './styles.css';
 import { HGT, W } from './shared/board';
+import { fmtScore } from './shared/scoring';
 import { Game, type GameEvents } from './game/state';
 import { DIRS } from './game/movement';
 import { bindInput } from './game/input';
@@ -9,7 +10,7 @@ import { startLoop } from './game/loop';
 import { buildLayers, type Layers } from './render/layers';
 import { draw } from './render/draw';
 import { $ } from './ui/dom';
-import { loadHigh, renderLives, renderScore, saveHigh } from './ui/hud';
+import { cancelTally, loadHigh, renderLives, renderScore, renderTimer, saveHigh, tally } from './ui/hud';
 import { renderDotsLeft, renderPower, renderWhere } from './ui/panel';
 import { hideOverlay, showBanner, showEnd, showTitle } from './ui/overlays';
 
@@ -31,13 +32,16 @@ const events: GameEvents = {
     renderLives(game.lives);
     renderDotsLeft(game.totalLeft);
   },
+  timer() { renderTimer(game.timeLeft); },
   where(force) { renderWhere(game.player.x, game.player.y, force); },
   power() { renderPower(game.fright); },
   banner: showBanner,
   end(result) {
     if (result.score > high) { high = result.score; saveHigh(high); }
-    events.hud();
-    showEnd(result.won, result.score, newGame);
+    renderLives(game.lives);
+    const final = showEnd(result, newGame);
+    tally(result.won ? result.points : result.score, result.score, high, reduceMotion,
+      v => { final.textContent = `FINAL ${fmtScore(v)}`; }, () => events.hud());
   },
 };
 
@@ -45,6 +49,7 @@ const game = new Game(events);
 
 function newGame(): void {
   pauseBtn.textContent = 'Pause';
+  cancelTally();
   hideOverlay();
   game.newGame();
 }
@@ -75,7 +80,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && gam
 
 function boot(): void {
   layers = buildLayers(DPR);
-  events.hud(); events.where(true);
+  events.hud(); events.timer(); events.where(true);
   showTitle(newGame);
   startLoop(() => game.tick(), () => draw(ctx, DPR, game, layers, reduceMotion));
 }

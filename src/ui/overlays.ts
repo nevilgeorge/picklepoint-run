@@ -1,6 +1,7 @@
 // Board overlays: title screen, READY!/PAUSED banner, end screens.
 
-import { fmtScore } from '../shared/scoring';
+import { BONUS_PER_SEC, clock, fmtScore, TICKS_PER_SEC } from '../shared/scoring';
+import type { RunResult } from '../game/state';
 import { $, h } from './dom';
 
 const overlay = $('overlay');
@@ -16,8 +17,8 @@ export function hideOverlay(): void {
   overlay.replaceChildren();
 }
 
-function show(...children: Node[]): void {
-  overlay.replaceChildren(...children);
+function show(...children: (Node | null)[]): void {
+  overlay.replaceChildren(...children.filter((c): c is Node => c !== null));
   overlay.hidden = false;
 }
 
@@ -32,15 +33,27 @@ export function showTitle(onStart: () => void): void {
   );
 }
 
-export function showEnd(won: boolean, score: number, onPlayAgain: () => void): void {
+/** Bonus line for a full clear: the time-bonus arithmetic, or the over-par note. */
+export function bonusLine(r: RunResult): string {
+  const secsLeft = Math.ceil(r.ticksLeft / TICKS_PER_SEC);
+  return r.bonus > 0
+    ? `Points ${r.points.toLocaleString('en-US')} + clear bonus ${secsLeft} s × ${BONUS_PER_SEC} = +${r.bonus.toLocaleString('en-US')}`
+    : `Points ${r.points.toLocaleString('en-US')} · over the 5:00 par, no time bonus`;
+}
+
+/** End screen. Returns the FINAL element so the caller can tally into it. */
+export function showEnd(r: RunResult, onPlayAgain: () => void): HTMLElement {
   const btn = h('button', { class: 'btn primary', type: 'button', text: 'PLAY AGAIN' });
   btn.addEventListener('click', onPlayAgain);
+  const final = h('p', { class: 'final', text: `FINAL ${fmtScore(r.won ? r.points : r.score)}` });
   show(
-    h('h2', { class: won ? undefined : 'lose', text: won ? 'YOU WIN!' : 'GAME OVER' }),
-    h('p', { text: won ? 'You cleared every street in Greenpoint.' : 'The locals got you.' }),
-    h('p', { class: 'final', text: `FINAL ${fmtScore(score)}` }),
+    h('h2', { class: r.won ? undefined : 'lose', text: r.won ? 'YOU WIN!' : 'GAME OVER' }),
+    h('p', { text: r.won ? `You cleared every street in Greenpoint in ${clock(r.elapsed)}.` : 'The locals got you.' }),
+    r.won ? h('p', { class: 'tally', text: bonusLine(r) }) : null,
+    final,
     btn,
     h('p', { class: 'sub', text: 'Press Enter to play again' }),
   );
   btn.focus({ preventScroll: true });
+  return final;
 }

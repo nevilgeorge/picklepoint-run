@@ -38,6 +38,9 @@ header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; }
 .stat .k.up { color: var(--alert); }
 .stat .v { font-family: var(--font-display); font-size: 16px; font-variant-numeric: tabular-nums; }
 .stat .v.hi { color: var(--dot); }
+.stat .v.time { color: var(--wall-soft); }
+.stat .v.time.low { color: var(--alert); }
+.stat .v.time.out { color: var(--muted); }
 .lives { display: flex; gap: 6px; min-height: 18px; align-items: center; }
 .life { width: 24px; height: 16px; border-radius: 9px; background: var(--pickle); box-shadow: inset -3px -2px 0 var(--pickle-dark); }
 .btn {

@@ -1,7 +1,7 @@
 // Game state machine: title → ready → play ⇄ paused → (dying → ready)* → over.
 
 import { DOTS, PELLETS, key, type Point } from '../shared/board';
-import { DOT_POINTS, FRIGHT_TICKS, PIEROGI_POINTS, PLAYER_SPEED, START_LIVES } from '../shared/scoring';
+import { DOT_POINTS, FRIGHT_TICKS, PAR_TICKS, PIEROGI_POINTS, PLAYER_SPEED, START_LIVES, finalScore } from '../shared/scoring';
 import { createChasers, speedOf, stepChaser, type ChaseContext, type Chaser } from './chasers';
 import { createPlayer, dist2, setDir, stepPlayer, type Dir, type Player } from './movement';
 
@@ -9,7 +9,14 @@ export type GameState = 'title' | 'ready' | 'play' | 'paused' | 'dying' | 'over'
 
 export interface RunResult {
   won: boolean;
+  /** Dots and pierogi, before bonus. */
+  points: number;
+  bonus: number;
   score: number;
+  /** Par-clock ticks left when the run ended. */
+  ticksLeft: number;
+  /** Play ticks (same counting rule as the par clock). */
+  elapsed: number;
   dots: number;
   pierogi: number;
 }
@@ -17,6 +24,7 @@ export interface RunResult {
 /** Hooks the UI implements; the game calls them when something visible changes. */
 export interface GameEvents {
   hud(): void;
+  timer(): void;
   where(force: boolean): void;
   power(): void;
   banner(text: string | null): void;
@@ -47,6 +55,11 @@ export class Game {
   player: Player = createPlayer();
   chasers: Chaser[] = createChasers();
   trail: Point[] = [];
+  /** Par clock: counts down during play and dying only, stops at 0. */
+  timeLeft = PAR_TICKS;
+  elapsed = 0;
+  /** Freezes the whole simulation (Scores modal open) without touching the state machine. */
+  frozen = false;
 
   private readonly ctx: ChaseContext;
 
@@ -79,7 +92,8 @@ export class Game {
   newGame(): void {
     this.score = 0; this.lives = START_LIVES;
     this.buildDots(); this.resetActors();
-    this.events.hud(); this.events.where(true);
+    this.timeLeft = PAR_TICKS; this.elapsed = 0;
+    this.events.hud(); this.events.timer(); this.events.where(true);
     this.state = 'ready'; this.timer = READY_TICKS;
     this.events.banner('READY!');
   }
@@ -98,9 +112,15 @@ export class Game {
 
   tick(): void {
     this.T++;
+    if (this.frozen) return;
     if (this.state === 'ready') {
       if (--this.timer <= 0) { this.state = 'play'; this.events.banner(null); }
       return;
+    }
+    if (this.state === 'play' || this.state === 'dying') {
+      this.elapsed++;
+      if (this.timeLeft > 0) this.timeLeft--;
+      if (this.elapsed % 15 === 0) this.events.timer();
     }
     if (this.state === 'dying') {
       if (--this.timer <= 0) {
@@ -162,7 +182,14 @@ export class Game {
 
   private endGame(won: boolean): void {
     this.state = 'over';
+    this.events.timer();
+    const points = this.score;
+    const { bonus, score } = finalScore(points, won, this.timeLeft);
+    this.score = score;
     this.events.banner(null); this.events.power();
-    this.events.end({ won, score: this.score, dots: this.dotsEaten, pierogi: this.pierogiEaten });
+    this.events.end({
+      won, points, bonus, score, ticksLeft: this.timeLeft, elapsed: this.elapsed,
+      dots: this.dotsEaten, pierogi: this.pierogiEaten,
+    });
   }
 }
