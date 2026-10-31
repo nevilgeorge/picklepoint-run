@@ -141,6 +141,12 @@ describe('POST /api/scores validation', () => {
     const response = await post(env, clearedRun({ bonus, score: pointsFor(DOT_COUNT, 4) + bonus }));
     expect(response.status).toBe(201);
   });
+
+  it('refuses submissions when IP_SALT is not configured', async () => {
+    const response = await post({ ...env, IP_SALT: undefined }, clearedRun());
+    expect(response.status).toBe(503);
+    expect(await getTop(env)).toEqual([]);
+  });
 });
 
 describe('POST /api/scores ranking', () => {

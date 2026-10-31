@@ -67,8 +67,10 @@ export const onRequestGet: PagesFunction = async ({ env }) => {
 
 export const onRequestPost: PagesFunction = async ({ request, env }) => {
   const db = env.DB;
+  // Without a salt, stored IP hashes could be reversed by brute force; refuse rather than store them.
+  if (!env.IP_SALT) return json({ error: 'The leaderboard is not accepting scores right now.' }, 503);
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-  const ipHash = await hashIp(ip, env.IP_SALT ?? '');
+  const ipHash = await hashIp(ip, env.IP_SALT);
   const now = new Date();
   const nowIso = now.toISOString();
 
