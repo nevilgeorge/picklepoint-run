@@ -1,4 +1,4 @@
-// Pure validation of leaderboard submissions (HANDOFF §9.3).
+// Pure validation of leaderboard submissions.
 
 import { BOARD_VERSION, DOT_COUNT, PIEROGI_COUNT } from '../../src/shared/board';
 import {

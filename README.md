@@ -6,8 +6,6 @@ A browser maze-chase on the real streets of Greenpoint, Brooklyn (11222). You're
 - **Leaderboard:** Cloudflare Pages Functions + D1 (SQLite).
 - **Tests:** Vitest.
 
-`reference/prototype.html` is the original single-file prototype. Don't edit it.
-
 ## Requirements
 
 - Node 20+ (Node 22+ to run `tests/api.test.ts`, which uses `node:sqlite`)
