@@ -7,7 +7,10 @@ import { $ } from './dom';
 const els = {
   where: $('where'), whereSub: $('whereSub'), dotsLeft: $('dotsLeft'),
   powerWrap: $('powerWrap'), power: $('power'),
+  // Compact copies beside the touch d-pad.
+  dotsLeftMini: $('dotsLeftMini'), powerMini: $('powerMini'),
 };
+const powerMiniBar = els.powerMini.firstElementChild as HTMLElement;
 
 export interface Location { main: string; sub: string; street: string }
 
@@ -40,10 +43,14 @@ export function renderWhere(x: number, y: number, force: boolean): void {
 
 export function renderDotsLeft(n: number): void {
   els.dotsLeft.textContent = `${n} left to eat`;
+  els.dotsLeftMini.textContent = `${n} left`;
 }
 
 export function renderPower(fright: number): void {
   const on = fright > 0;
-  if (els.powerWrap.hidden === on) els.powerWrap.hidden = !on;
-  if (on) els.power.style.transform = `scaleX(${fright / FRIGHT_TICKS})`;
+  if (els.powerWrap.hidden === on) { els.powerWrap.hidden = !on; els.powerMini.hidden = !on; }
+  if (on) {
+    const t = `scaleX(${fright / FRIGHT_TICKS})`;
+    els.power.style.transform = t; powerMiniBar.style.transform = t;
+  }
 }

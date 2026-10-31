@@ -8,7 +8,8 @@ import { DIRS, type DirName } from './game/movement';
 import { bindInput } from './game/input';
 import { startLoop } from './game/loop';
 import { buildLayers, type Layers } from './render/layers';
-import { draw } from './render/draw';
+import { draw, type Viewport } from './render/draw';
+import { approach, fitView, followView, toScreen, type View } from './render/camera';
 import { createLeaderboardClient } from './leaderboard/client';
 import { LeaderboardError, TOP_N, type RunSubmission, type ScoreEntry } from './leaderboard/types';
 import { $ } from './ui/dom';
@@ -21,10 +22,33 @@ import { ScoresModal } from './ui/leaderboard';
 const canvas = $<HTMLCanvasElement>('game');
 const ctx = canvas.getContext('2d')!;
 const DPR = Math.min(2, window.devicePixelRatio || 1);
-canvas.width = W * DPR; canvas.height = HGT * DPR;
 const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+const board = $('board');
+
+/** Touch layout (phones): compact header, d-pad under the board, follow camera. */
+const touchQuery = window.matchMedia?.('(pointer: coarse) and (max-width: 900px)');
+let touch = false;
+function applyTouch(): void {
+  touch = touchQuery?.matches ?? false;
+  document.body.classList.toggle('touch', touch);
+}
+applyTouch();
+touchQuery?.addEventListener('change', applyTouch);
+
+// Canvas backing store tracks its element's size; the camera maps the board into it.
+let cssW = W, cssH = HGT;
+new ResizeObserver(([entry]) => {
+  cssW = Math.max(1, entry.contentRect.width); cssH = Math.max(1, entry.contentRect.height);
+  canvas.width = Math.round(cssW * DPR); canvas.height = Math.round(cssH * DPR);
+}).observe(canvas);
+// The touch layout sizes the play area as "viewport minus header".
+const header = document.querySelector('header')!;
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--hdr', `${header.offsetHeight}px`);
+}).observe(header);
 
 const pauseBtn = $<HTMLButtonElement>('pauseBtn');
+const pauseLabel = pauseBtn.querySelector<HTMLElement>('.lbl')!;
 const restartBtn = $<HTMLButtonElement>('restartBtn');
 const scoresBtn = $<HTMLButtonElement>('scoresBtn');
 
@@ -68,15 +92,59 @@ function qualifies(score: number, top: readonly ScoreEntry[]): boolean {
 function newGame(): void {
   scores.close();
   endScreen = { kind: 'none' };
-  pauseBtn.textContent = 'Pause';
   cancelTally();
   hideOverlay();
   game.newGame();
+  syncPauseBtn();
 }
 
 function togglePause(): void {
   game.togglePause();
-  pauseBtn.textContent = game.state === 'paused' ? 'Resume' : 'Pause';
+  syncPauseBtn();
+}
+
+function syncPauseBtn(): void {
+  const paused = game.state === 'paused';
+  pauseLabel.textContent = paused ? 'Resume' : 'Pause';
+  pauseBtn.setAttribute('aria-label', pauseLabel.textContent);
+  pauseBtn.classList.toggle('is-paused', paused);
+}
+
+// ---------- Camera ----------
+let view: View = fitView(W, HGT);
+let lastFrameAt = 0;
+let lastPlayer = { x: game.player.x, y: game.player.y };
+let bannerKey = '';
+
+/** Follow the pickle on touch during a run; otherwise show the whole board. */
+function updateCamera(now: number): Viewport {
+  const frames = lastFrameAt ? (now - lastFrameAt) / (1000 / 60) : 0;
+  lastFrameAt = now;
+  const { x, y } = game.player;
+  const follow = touch && game.state !== 'title' && game.state !== 'over';
+  const target = follow ? followView(x, y, cssW, cssH) : fitView(cssW, cssH);
+  // Snap on desktop, with reduced motion, and when the pickle teleports (reset after a death).
+  const jumped = Math.abs(x - lastPlayer.x) + Math.abs(y - lastPlayer.y) > 40;
+  view = !touch || reduceMotion || jumped ? target : approach(view, target, frames);
+  lastPlayer = { x, y };
+  placeBanner(follow);
+  return { cssW, cssH, view, minimap: follow };
+}
+
+/** On touch, keep READY!/PAUSED near the pickle (or over Greenpoint Ave when showing the whole board). */
+function placeBanner(follow: boolean): void {
+  if (!touch) {
+    if (bannerKey) { board.style.removeProperty('--banner-left'); board.style.removeProperty('--banner-top'); bannerKey = ''; }
+    return;
+  }
+  const p = follow ? toScreen(view, game.player.x, game.player.y + 60) : toScreen(view, W / 2, 405);
+  const left = Math.round(Math.min(cssW - 70, Math.max(70, p.left)));
+  const top = Math.round(Math.min(cssH - 20, Math.max(20, p.top)));
+  const k = `${left},${top}`;
+  if (k === bannerKey) return;
+  bannerKey = k;
+  board.style.setProperty('--banner-left', `${left}px`);
+  board.style.setProperty('--banner-top', `${top}px`);
 }
 
 function tallyInto(el: HTMLElement, r: RunResult, prefix: string): void {
@@ -212,7 +280,7 @@ function boot(): void {
   layers = buildLayers(DPR);
   events.hud(); events.timer(); events.where(true);
   showTitle(newGame);
-  startLoop(() => game.tick(), () => draw(ctx, DPR, game, layers, reduceMotion));
+  startLoop(() => game.tick(), () => draw(ctx, DPR, game, layers, reduceMotion, updateCamera(performance.now())));
 }
 
 void refreshTop();

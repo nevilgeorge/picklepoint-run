@@ -21,17 +21,36 @@
     <div class="stat"><span class="k">HIGH</span><span class="v hi" id="high">000,000</span></div>
     <div class="stat"><span class="k">PAR</span><span class="v time" id="timer">5:00</span></div>
     <div class="stat"><span class="k">LIVES</span><div class="lives" id="lives" aria-live="polite"></div></div>
-    <button class="btn" id="pauseBtn" type="button">Pause</button>
-    <button class="btn" id="restartBtn" type="button">Restart</button>
-    <button class="btn" id="scoresBtn" type="button" aria-pressed="false" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v1a4 4 0 0 1-4 4M7 5H4v1a4 4 0 0 0 4 4"/></svg>Scores</button>
+    <button class="btn" id="pauseBtn" type="button" aria-label="Pause"><svg class="ico ico-pause" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg><svg class="ico ico-play" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg><span class="lbl">Pause</span></button>
+    <button class="btn" id="restartBtn" type="button" aria-label="Restart"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg><span class="lbl">Restart</span></button>
+    <button class="btn" id="scoresBtn" type="button" aria-pressed="false" aria-haspopup="dialog" aria-label="Scores"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v1a4 4 0 0 1-4 4M7 5H4v1a4 4 0 0 0 4 4"/></svg><span class="lbl">Scores</span></button>
   </header>
 
   <div class="stage">
-    <div class="board" id="board">
-      <canvas id="game" width="840" height="720" aria-label="Picklepoint Run game board: a maze of Greenpoint streets"></canvas>
-      <div class="banner" id="banner" hidden>READY!</div>
-      <div class="overlay" id="overlay"></div>
-      <div class="modal-backdrop" id="scoresModal" hidden></div>
+    <div class="play">
+      <div class="board" id="board">
+        <canvas id="game" width="840" height="720" aria-label="Picklepoint Run game board: a maze of Greenpoint streets"></canvas>
+        <div class="banner" id="banner" hidden>READY!</div>
+        <div class="overlay" id="overlay"></div>
+        <div class="modal-backdrop" id="scoresModal" hidden></div>
+      </div>
+      <div class="controls">
+        <div class="mini" aria-hidden="true">
+          <span class="chip" id="dotsLeftMini">— left</span>
+          <div class="meter" id="powerMini" hidden><div></div></div>
+        </div>
+        <div class="dpad" aria-label="Direction pad">
+          <span class="gap"></span>
+          <button type="button" data-dir="up" aria-label="Move up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+          <span class="gap"></span>
+          <button type="button" data-dir="left" aria-label="Move left"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <span class="gap"></span>
+          <button type="button" data-dir="right" aria-label="Move right"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <span class="gap"></span>
+          <button type="button" data-dir="down" aria-label="Move down"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+          <span class="gap"></span>
+        </div>
+      </div>
     </div>
 
     <aside>
@@ -78,18 +97,6 @@
           <li><span class="num">6</span><p><b>McCarren Park</b><span>South of Nassau Ave (map edge)</span></p></li>
         </ol>
       </section>
-
-      <div class="dpad" aria-label="Direction pad">
-        <span class="gap"></span>
-        <button type="button" data-dir="up" aria-label="Move up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
-        <span class="gap"></span>
-        <button type="button" data-dir="left" aria-label="Move left"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-        <span class="gap"></span>
-        <button type="button" data-dir="right" aria-label="Move right"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-        <span class="gap"></span>
-        <button type="button" data-dir="down" aria-label="Move down"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-        <span class="gap"></span>
-      </div>
     </aside>
   </div>
 </div>

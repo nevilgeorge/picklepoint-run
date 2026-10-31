@@ -3,8 +3,9 @@
 import { HGT, RIVER_X, CREEK_Y, W } from '../shared/board';
 import type { Game } from '../game/state';
 import type { Dir } from '../game/movement';
-import { COLORS, PIXEL, type Layers } from './layers';
+import { COLORS, PIXEL, rr, type Layers } from './layers';
 import { drawPickle, drawPierogi, drawSprite, type Facing } from './sprites';
+import { toScreen, type View } from './camera';
 
 const FLASH_TICKS = 120;
 
@@ -23,13 +24,26 @@ function drawWater(ctx: CanvasRenderingContext2D, T: number, reduceMotion: boole
   for (let y = off - 10; y < CREEK_Y; y += 10) if (y >= 0) ctx.fillRect(RIVER_X, y, W - RIVER_X, 1);
 }
 
-export function draw(ctx: CanvasRenderingContext2D, dpr: number, game: Game, layers: Layers | null, reduceMotion: boolean): void {
+/** Canvas size in CSS px, the camera view, and whether to draw the minimap. */
+export interface Viewport { cssW: number; cssH: number; view: View; minimap: boolean }
+
+const MINI_W = 92;
+const MINI_MARGIN = 8;
+
+export function draw(ctx: CanvasRenderingContext2D, dpr: number, game: Game, layers: Layers | null, reduceMotion: boolean, vp: Viewport): void {
   const T = game.T;
+  const { view } = vp;
+  // Letterbox / out-of-board area reads as open water.
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = COLORS.water; ctx.fillRect(0, 0, vp.cssW, vp.cssH);
+  const s = dpr * view.zoom;
+  ctx.setTransform(s, 0, 0, s, -view.x * s, -view.y * s);
   drawWater(ctx, T, reduceMotion);
   if (layers) ctx.drawImage(layers.base, 0, 0, W, HGT);
   ctx.fillStyle = COLORS.dot;
-  game.dots.forEach(d => ctx.fillRect(d.x - 2, d.y - 2, 4, 4));
+  const x0 = view.x - 4, y0 = view.y - 4;
+  const x1 = view.x + vp.cssW / view.zoom + 4, y1 = view.y + vp.cssH / view.zoom + 4;
+  game.dots.forEach(d => { if (d.x > x0 && d.x < x1 && d.y > y0 && d.y < y1) ctx.fillRect(d.x - 2, d.y - 2, 4, 4); });
   game.pellets.forEach(p => drawPierogi(ctx, p.x, p.y, T));
   if (layers) ctx.drawImage(layers.label, 0, 0, W, HGT);
 
@@ -57,4 +71,37 @@ export function draw(ctx: CanvasRenderingContext2D, dpr: number, game: Game, lay
   const scale = dying ? Math.max(0, game.timer / 80) : 1;
   const open = p.moving && game.state === 'play' ? Math.abs(Math.sin(T * 0.35)) : 0.35;
   drawPickle(ctx, p.x, p.y, facingOf(p.face), open, scale);
+
+  if (vp.minimap && layers) drawMinimap(ctx, dpr, game, layers, vp);
+}
+
+/** Small whole-board inset (bottom-right) with the player, chasers and the visible area. */
+function drawMinimap(ctx: CanvasRenderingContext2D, dpr: number, game: Game, layers: Layers, vp: Viewport): void {
+  const m = MINI_W / W;
+  const mw = MINI_W, mh = HGT * m;
+  const left = vp.cssW - mw - MINI_MARGIN, top = vp.cssH - mh - MINI_MARGIN;
+  // Fade out of the way when the pickle is underneath it.
+  const p = toScreen(vp.view, game.player.x, game.player.y);
+  const under = p.left > left - 16 && p.top > top - 16;
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.save();
+  ctx.globalAlpha = under ? 0.3 : 0.85;
+  rr(ctx, left - 2, top - 2, mw + 4, mh + 4, 6);
+  ctx.fillStyle = COLORS.water; ctx.fill();
+  ctx.lineWidth = 1; ctx.strokeStyle = '#2E2A5C'; ctx.stroke();
+  ctx.drawImage(layers.base, left, top, mw, mh);
+
+  const v = vp.view;
+  ctx.strokeStyle = COLORS.wallSoft; ctx.lineWidth = 1;
+  const rx = Math.max(0, v.x), ry = Math.max(0, v.y);
+  const rw = Math.min(W, v.x + vp.cssW / v.zoom) - rx, rh = Math.min(HGT, v.y + vp.cssH / v.zoom) - ry;
+  ctx.strokeRect(left + rx * m + 0.5, top + ry * m + 0.5, rw * m - 1, rh * m - 1);
+
+  const dot = (x: number, y: number, r: number, color: string): void => {
+    ctx.beginPath(); ctx.arc(left + x * m, top + y * m, r, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+  };
+  game.chasers.forEach(c => dot(c.x, c.y, 2.2, game.fright > 0 ? '#5B7CFF' : '#FF7A6B'));
+  dot(game.player.x, game.player.y, 2.8, '#8BD450');
+  ctx.restore();
 }

@@ -11,6 +11,9 @@ import { renderTable } from './leaderboard';
 const overlay = $('overlay');
 const banner = $('banner');
 
+/** Touch layout is on (set by main.ts); keyboard hints don't apply there. */
+const isTouch = (): boolean => document.body.classList.contains('touch');
+
 export function showBanner(text: string | null): void {
   if (text === null) { banner.hidden = true; return; }
   banner.textContent = text; banner.hidden = false;
@@ -40,7 +43,7 @@ export function showTitle(onStart: () => void): void {
     h('h2', { text: 'PICKLEPOINT RUN' }),
     h('p', { text: "Eat every dot on Greenpoint's streets. Grab a pierogi and the locals run from you for 8 seconds. Beat the 5:00 par for a time bonus." }),
     button('START', onStart, true),
-    h('p', { class: 'sub', text: 'Arrow keys or WASD to move · P to pause · Enter to start' }),
+    h('p', { class: 'sub', text: isTouch() ? 'Tap the arrows below the map to move' : 'Arrow keys or WASD to move · P to pause · Enter to start' }),
   );
 }
 
@@ -140,7 +143,7 @@ export function showShort(r: RunResult, street: string, top: readonly ScoreEntry
     final,
     card,
     h('div', { class: 'actions' }, again, seeTop),
-    h('p', { class: 'sub', text: 'No initials needed. Press Enter to play again.' }),
+    h('p', { class: 'sub', text: isTouch() ? 'No initials needed.' : 'No initials needed. Press Enter to play again.' }),
   );
   again.focus({ preventScroll: true });
   return { final, seeTop };

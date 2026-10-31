@@ -94,10 +94,59 @@ aside { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .rules strong { color: var(--text); font-weight: 600; }
 kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 5px; color: var(--text); font-family: inherit; font-size: 11px; }
 
-.dpad { display: none; grid-template-columns: repeat(3, 60px); gap: 6px; justify-content: center; }
-.dpad button { height: 60px; border-radius: 14px; border: 1.5px solid var(--wall); background: var(--panel); color: var(--wall-soft); display: flex; align-items: center; justify-content: center; touch-action: none; }
+/* Board plus touch controls; the controls sit directly under the board. */
+.play { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.controls { display: none; align-items: center; justify-content: center; gap: 14px; }
+.mini { display: none; }
+.dpad { display: grid; grid-template-columns: repeat(3, 60px); gap: 6px; justify-content: center; }
+.dpad button { height: 60px; border-radius: 14px; border: 1.5px solid var(--wall); background: var(--panel); color: var(--wall-soft); display: flex; align-items: center; justify-content: center; touch-action: none; -webkit-user-select: none; user-select: none; }
+.dpad button:active { background: var(--lane); border-color: var(--wall-soft); }
 .dpad .gap { height: 60px; }
-@media (pointer: coarse) { .dpad { display: grid; } }
+@media (pointer: coarse) { .controls { display: flex; } }
+#pauseBtn .ico, #restartBtn .ico { display: none; }
+
+/* ---------- Touch layout: compact header, board fills the screen, d-pad under it ---------- */
+body.touch { overscroll-behavior: none; touch-action: manipulation; }
+body.touch .wrap { padding-block: max(8px, env(safe-area-inset-top, 0px)) 24px; padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); gap: 8px; }
+body.touch header { gap: 8px; column-gap: 8px; }
+body.touch .brand { gap: 0; }
+body.touch .brand h1 { font-size: 12px; }
+body.touch .brand p { display: none; }
+body.touch header .btn { order: 1; width: 40px; min-height: 40px; padding: 0; }
+body.touch header .btn .lbl { display: none; }
+body.touch #pauseBtn .ico-pause, body.touch #restartBtn .ico { display: block; }
+body.touch #pauseBtn.is-paused .ico-pause { display: none; }
+body.touch #pauseBtn.is-paused .ico-play { display: block; }
+body.touch header::after { content: ''; order: 2; flex-basis: 100%; height: 0; }
+body.touch .stat { order: 3; flex: 1 1 auto; gap: 4px; }
+body.touch .stat .k { font-size: 8px; }
+body.touch .stat .v { font-size: 11px; }
+body.touch .lives { gap: 4px; min-height: 11px; }
+body.touch .life { width: 16px; height: 11px; border-radius: 6px; box-shadow: inset -2px -1.5px 0 var(--pickle-dark); }
+body.touch .stage { display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
+/* --hdr is the measured header height (set from main.ts). */
+body.touch .play { height: calc(100dvh - var(--hdr, 72px) - 8px - max(8px, env(safe-area-inset-top, 0px)) - max(8px, env(safe-area-inset-bottom, 0px))); gap: 10px; }
+body.touch .board { flex: 1 1 auto; min-height: 0; max-width: none; aspect-ratio: auto; border-radius: 10px; box-shadow: 0 0 0 2px var(--line); }
+body.touch .banner { top: var(--banner-top, 56.25%); left: var(--banner-left, 50%); }
+body.touch .controls { flex: 0 0 auto; justify-content: space-between; padding-inline: 4px; }
+body.touch .mini { display: flex; flex-direction: column; gap: 8px; flex: 1 1 0; min-width: 0; max-width: 130px; }
+body.touch .mini .meter[hidden] { display: none; }
+body.touch .dpad { grid-template-columns: repeat(3, 64px); gap: 6px; }
+body.touch .dpad button, body.touch .dpad .gap { height: 64px; }
+body.touch .overlay { padding: 14px; }
+
+/* Landscape phones: board left, d-pad right, header in one thin row. */
+@media (orientation: landscape) {
+  body.touch header::after { display: none; }
+  body.touch .stat { flex: 0 1 auto; }
+  body.touch header .btn { order: 4; }
+  body.touch .play { flex-direction: row; }
+  body.touch .board { width: auto; flex: 1 1 0; min-width: 0; }
+  body.touch .controls { flex: 0 0 auto; flex-direction: column; justify-content: center; padding-inline: 0; }
+  body.touch .mini { flex: 0 0 auto; max-width: none; width: 100%; align-items: center; }
+  body.touch .dpad { grid-template-columns: repeat(3, 56px); }
+  body.touch .dpad button, body.touch .dpad .gap { height: 56px; }
+}
 
 /* ---------- Leaderboard (§7) ---------- */
 .overlay { justify-content: safe center; }
